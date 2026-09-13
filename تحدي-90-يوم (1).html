@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>سجلّ الانضباط | تحدي 90 يوم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172B;
+    --bg-elevated:#1A2040;
+    --bg-card:#1E2549;
+    --gold:#F2A93B;
+    --gold-dim:#C98A2E;
+    --green:#3FA34D;
+    --green-dim:#274F30;
+    --red:#E1523D;
+    --red-dim:#4A2620;
+    --yellow:#E8B93B;
+    --yellow-dim:#4A3E1E;
+    --text:#EDE8DE;
+    --text-dim:#9AA0C0;
+    --text-faint:#6A7094;
+    --border:rgba(237,232,222,0.09);
+    --radius:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Cairo',sans-serif;
+    min-height:100vh;
+    padding-bottom:84px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  /* ===== layout shell ===== */
+  .app{max-width:520px;margin:0 auto;padding:20px 18px 8px;}
+  header.top{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:22px;
+  }
+  header.top .brand{font-weight:700;font-size:15px;color:var(--text-dim);letter-spacing:.2px;}
+  header.top .brand b{color:var(--gold);font-weight:900;}
+  header.top .streak{font-size:13px;color:var(--text-faint);}
+
+  .view{display:none;animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* ===== bottom nav ===== */
+  nav.tabbar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:rgba(18,23,43,0.96);
+    backdrop-filter:blur(8px);
+    border-top:1px solid var(--border);
+    display:flex;
+    max-width:520px;margin:0 auto;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav.tabbar button{
+    flex:1;background:none;border:none;color:var(--text-faint);
+    font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;
+    padding:14px 4px 12px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    border-top:2px solid transparent;
+    transition:color .15s ease;
+  }
+  nav.tabbar button .dot{width:5px;height:5px;border-radius:50%;background:transparent;}
+  nav.tabbar button.active{color:var(--gold);}
+  nav.tabbar button.active .dot{background:var(--gold);}
+
+  /* ===== home hero ===== */
+  .hero{
+    text-align:center;padding:34px 0 22px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:24px;
+  }
+  .hero .day-label{font-size:13px;color:var(--text-dim);font-weight:600;margin-bottom:6px;}
+  .hero .day-number{
+    font-size:88px;font-weight:900;line-height:1;color:var(--gold);
+    font-variant-numeric:tabular-nums;
+  }
+  .hero .day-number span{font-size:28px;color:var(--text-faint);font-weight:700;}
+  .hero .day-sub{font-size:13px;color:var(--text-faint);margin-top:8px;}
+
+  .progress-track{
+    height:10px;border-radius:6px;background:var(--bg-card);
+    overflow:hidden;margin:6px 0 6px;border:1px solid var(--border);
+  }
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));
+    border-radius:6px;transition:width .5s ease;}
+
+  .stat-row{display:flex;gap:12px;margin-top:20px;}
+  .stat-box{
+    flex:1;background:var(--bg-card);border:1px solid var(--border);
+    border-radius:var(--radius);padding:16px 14px;text-align:center;
+  }
+  .stat-box .num{font-size:26px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums;}
+  .stat-box .lbl{font-size:12px;color:var(--text-faint);margin-top:4px;font-weight:600;}
+
+  .status-banner{
+    margin-top:20px;border-radius:var(--radius);padding:16px 18px;
+    font-weight:700;font-size:15px;text-align:center;border:1px solid;
+  }
+  .status-good{background:var(--green-dim);color:#8FE39C;border-color:rgba(63,163,77,.4);}
+  .status-mid{background:var(--yellow-dim);color:#F5D480;border-color:rgba(232,185,59,.4);}
+  .status-bad{background:var(--red-dim);color:#F29488;border-color:rgba(225,82,61,.4);}
+
+  .rule-card{
+    margin-top:20px;background:var(--bg-elevated);border:1px solid var(--border);
+    border-radius:var(--radius);padding:16px 18px;font-size:13px;color:var(--text-dim);line-height:1.9;
+  }
+  .rule-card b{color:var(--gold);}
+
+  .cta-primary{
+    display:block;width:100%;margin-top:22px;padding:16px;
+    background:var(--gold);color:#1A1300;border:none;border-radius:var(--radius);
+    font-family:'Cairo',sans-serif;font-weight:900;font-size:16px;cursor:pointer;
+  }
+  .cta-primary:active{transform:scale(.98);}
+  .cta-done{
+    display:block;width:100%;margin-top:22px;padding:16px;text-align:center;
+    background:var(--bg-card);color:var(--text-dim);border:1px solid var(--border);
+    border-radius:var(--radius);font-weight:700;font-size:14px;
+  }
+
+  /* ===== assessment ===== */
+  h1.page-title{font-size:20px;font-weight:900;margin:0 0 4px;}
+  p.page-sub{font-size:13px;color:var(--text-faint);margin:0 0 22px;}
+
+  .qcard{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px;margin-bottom:14px;
+  }
+  .qcard .qnum{font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px;}
+  .qcard .qtext{font-size:15.5px;font-weight:700;line-height:1.6;margin-bottom:14px;}
+  .btnrow{display:flex;gap:10px;}
+  .yn-btn{
+    flex:1;padding:14px 8px;border-radius:8px;border:1.5px solid var(--border);
+    background:var(--bg-elevated);color:var(--text-dim);
+    font-family:'Cairo',sans-serif;font-weight:800;font-size:14.5px;cursor:pointer;
+    transition:all .12s ease;
+  }
+  .yn-btn.yes.sel{background:rgba(63,163,77,.18);border-color:var(--green);color:#9FE3AC;}
+  .yn-btn.no.sel{background:rgba(225,82,61,.16);border-color:var(--red);color:#F0958A;}
+  .yn-btn .pts{display:block;font-size:11px;font-weight:600;opacity:.75;margin-top:3px;}
+
+  .traps-card{
+    background:var(--bg-elevated);border:1px dashed var(--border);border-radius:var(--radius);
+    padding:16px 18px;margin:20px 0 6px;
+  }
+  .traps-card .qnum{font-size:12px;color:var(--text-faint);font-weight:700;margin-bottom:10px;}
+  .trap-item{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:11px 0;border-bottom:1px solid var(--border);gap:12px;
+  }
+  .trap-item:last-child{border-bottom:none;}
+  .trap-item span{font-size:14px;color:var(--text-dim);font-weight:600;line-height:1.5;}
+  .switch{
+    width:44px;height:26px;border-radius:14px;background:var(--bg-card);
+    border:1.5px solid var(--border);position:relative;cursor:pointer;flex:none;
+    transition:background .15s ease;
+  }
+  .switch .knob{
+    position:absolute;top:2px;right:2px;width:19px;height:19px;border-radius:50%;
+    background:var(--text-faint);transition:.15s ease;
+  }
+  .switch.on{background:rgba(225,82,61,.25);border-color:var(--red);}
+  .switch.on .knob{right:20px;background:var(--red);}
+
+  .save-btn{
+    display:block;width:100%;margin-top:22px;padding:17px;
+    background:var(--gold);color:#1A1300;border:none;border-radius:var(--radius);
+    font-family:'Cairo',sans-serif;font-weight:900;font-size:16.5px;cursor:pointer;
+  }
+  .save-btn:disabled{background:var(--bg-card);color:var(--text-faint);}
+
+  .result-overlay{
+    position:fixed;inset:0;background:rgba(10,13,26,.88);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:24px;
+  }
+  .result-overlay.show{display:flex;}
+  .result-card{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+    padding:34px 26px;text-align:center;max-width:340px;width:100%;
+  }
+  .result-card .score{font-size:64px;font-weight:900;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums;}
+  .result-card .score-lbl{font-size:13px;color:var(--text-faint);margin-top:6px;font-weight:600;}
+  .result-card .verdict{margin-top:18px;font-size:15px;font-weight:700;border-radius:10px;padding:12px;}
+  .result-card .close-btn{
+    margin-top:20px;width:100%;padding:13px;background:var(--gold);color:#1A1300;
+    border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-weight:800;font-size:14.5px;cursor:pointer;
+  }
+
+  /* ===== stats ===== */
+  .period-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px;}
+  .period-card{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 8px;text-align:center;
+  }
+  .period-card .p-lbl{font-size:11px;color:var(--text-faint);font-weight:700;margin-bottom:6px;}
+  .period-card .p-num{font-size:19px;font-weight:900;font-variant-numeric:tabular-nums;}
+  .period-card .p-goal{font-size:10.5px;color:var(--text-faint);margin-top:2px;}
+  .period-card .p-tag{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:20px;}
+  .tag-good{background:var(--green-dim);color:#8FE39C;}
+  .tag-mid{background:var(--yellow-dim);color:#F5D480;}
+  .tag-bad{background:var(--red-dim);color:#F29488;}
+
+  .chart-wrap{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 14px 12px;margin-bottom:20px;
+  }
+  .chart-title{font-size:13px;font-weight:700;color:var(--text-dim);margin-bottom:14px;}
+  .chart-bars{display:flex;align-items:flex-end;gap:4px;height:120px;border-bottom:1px solid var(--border);padding-bottom:2px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;}
+  .bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;}
+  .bar-empty{background:var(--bg-elevated);}
+  .bar-day{font-size:9px;color:var(--text-faint);margin-top:6px;}
+
+  .empty-state{
+    text-align:center;padding:50px 20px;color:var(--text-faint);font-size:14px;line-height:1.8;
+  }
+  .empty-state .emoji{font-size:38px;display:block;margin-bottom:12px;}
+
+  .footer-note{text-align:center;font-size:11.5px;color:var(--text-faint);margin-top:26px;line-height:1.8;}
+
+  /* ===== notes ===== */
+  .notes-card{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px 18px;margin:18px 0 6px;
+  }
+  .notes-card .qnum{font-size:12px;color:var(--gold);font-weight:700;margin-bottom:10px;}
+  .notes-card textarea{
+    width:100%;min-height:90px;background:var(--bg-elevated);border:1.5px solid var(--border);
+    border-radius:8px;padding:12px;color:var(--text);font-family:'Cairo',sans-serif;
+    font-size:14px;line-height:1.7;resize:vertical;
+  }
+  .notes-card textarea:focus{outline:none;border-color:var(--gold-dim);}
+  .notes-card textarea::placeholder{color:var(--text-faint);}
+  .note-readback{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;margin-top:14px;font-size:13px;color:var(--text-dim);line-height:1.8;
+  }
+  .note-readback .n-lbl{font-size:11px;color:var(--text-faint);font-weight:700;margin-bottom:5px;}
+
+  /* ===== danger zone ===== */
+  .danger-zone{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);}
+  .reset-btn{
+    display:block;width:100%;padding:14px;background:transparent;
+    border:1.5px solid rgba(225,82,61,.35);color:#E1786A;border-radius:var(--radius);
+    font-family:'Cairo',sans-serif;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .reset-btn:active{background:rgba(225,82,61,.1);}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="top">
+    <div class="brand"><b>٩٠</b> يوم — سجلّ الانضباط</div>
+    <div class="streak" id="topStreak"></div>
+  </header>
+
+  <!-- ===== HOME ===== -->
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <div class="day-label">اليوم</div>
+      <div class="day-number" id="homeDayNum">1 <span>/ 90</span></div>
+      <div class="day-sub" id="homeDaySub">ابدأ رحلتك اليوم</div>
+      <div class="progress-track" style="margin-top:18px;">
+        <div class="progress-fill" id="homeProgressFill" style="width:0%;"></div>
+      </div>
+      <div class="day-sub" id="homeProgressLbl">0 / 2700 نقطة</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="num" id="homeTotalPts">0</div>
+        <div class="lbl">إجمالي النقاط</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="homeAvgPts">0</div>
+        <div class="lbl">متوسط اليوم</div>
+      </div>
+    </div>
+
+    <div class="status-banner status-mid" id="homeStatusBanner">ابدأ تقييمك الأول اليوم</div>
+
+    <button class="cta-primary" id="homeCta" onclick="goTo('assess')">تقييم اليوم</button>
+
+    <div class="rule-card">
+      <b>القاعدة الذهبية:</b> اجمع <b>30</b> نقطة يومياً بثبات، تصل إلى <b>2700</b> نقطة خلال 90 يوم، وتحقق هدفك في التعلم — الإنجليزية، المال، التكنولوجيا والـ AI.
+    </div>
+  </section>
+
+  <!-- ===== ASSESSMENT ===== -->
+  <section class="view" id="view-assess">
+    <h1 class="page-title">تقييم اليوم</h1>
+    <p class="page-sub" id="assessDateLbl">—</p>
+
+    <div class="qcard" data-q="1">
+      <div class="qnum">السؤال ١</div>
+      <div class="qtext">هل بدأت يومك بالمذاكرة فوراً؟</div>
+      <div class="btnrow">
+        <button class="yn-btn yes" onclick="answerQ(1,'yes',this)">نعم<span class="pts">+10</span></button>
+        <button class="yn-btn no" onclick="answerQ(1,'no',this)">لا<span class="pts">−5</span></button>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="2">
+      <div class="qnum">السؤال ٢</div>
+      <div class="qtext">هل تشتت انتباهك بمشتتات خارجية؟</div>
+      <div class="btnrow">
+        <button class="yn-btn no" onclick="answerQ(2,'no',this)">لا<span class="pts">+10</span></button>
+        <button class="yn-btn yes" onclick="answerQ(2,'yes',this)">نعم<span class="pts">−5</span></button>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="3">
+      <div class="qnum">السؤال ٣</div>
+      <div class="qtext">هل أكملت مهامك وتعلمت اليوم؟</div>
+      <div class="btnrow">
+        <button class="yn-btn yes" onclick="answerQ(3,'yes',this)">نعم<span class="pts">+15</span></button>
+        <button class="yn-btn no" onclick="answerQ(3,'no',this)">لا<span class="pts">−10</span></button>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="4">
+      <div class="qnum">السؤال ٤</div>
+      <div class="qtext">هل تشعر بتحسن في تركيزك؟</div>
+      <div class="btnrow">
+        <button class="yn-btn yes" onclick="answerQ(4,'yes',this)">نعم<span class="pts">+10</span></button>
+        <button class="yn-btn no" onclick="answerQ(4,'no',this)">لا<span class="pts">0</span></button>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="5">
+      <div class="qnum">السؤال ٥</div>
+      <div class="qtext">هل بدأت التعلم فوراً بدون تأجيل؟</div>
+      <div class="btnrow">
+        <button class="yn-btn yes" onclick="answerQ(5,'yes',this)">نعم<span class="pts">+10</span></button>
+        <button class="yn-btn no" onclick="answerQ(5,'no',this)">لا<span class="pts">−5</span></button>
+      </div>
+    </div>
+
+    <div class="traps-card">
+      <div class="qnum">الفخاخ (اختياري — كل فخ = −5)</div>
+      <div class="trap-item">
+        <span>فتحت مواقع التواصل الاجتماعي بدون هدف</span>
+        <div class="switch" id="trap1" onclick="toggleTrap(1)"><div class="knob"></div></div>
+      </div>
+      <div class="trap-item">
+        <span>أجّلت مهمة كنت تعرف أنها الأهم</span>
+        <div class="switch" id="trap2" onclick="toggleTrap(2)"><div class="knob"></div></div>
+      </div>
+      <div class="trap-item">
+        <span>سهرت متأخراً بدون سبب حقيقي</span>
+        <div class="switch" id="trap3" onclick="toggleTrap(3)"><div class="knob"></div></div>
+      </div>
+      <div class="trap-item">
+        <span>اتكلمت كتير مع شات AI بدل التعلم الفعلي</span>
+        <div class="switch" id="trap4" onclick="toggleTrap(4)"><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="notes-card">
+      <div class="qnum">أنا اتعلمت إيه وعملت إيه النهاردة؟</div>
+      <textarea id="notesInput" placeholder="اكتب باختصار: إيه اللي ذاكرته أو أنجزته..." oninput="currentNotes=this.value"></textarea>
+    </div>
+
+    <button class="save-btn" id="saveBtn" onclick="saveToday()" disabled>احفظ تقييم اليوم</button>
+  </section>
+
+  <!-- ===== STATS ===== -->
+  <section class="view" id="view-stats">
+    <h1 class="page-title">الإحصائيات</h1>
+    <p class="page-sub">تتبّع مسارك نحو الـ 2700 نقطة</p>
+
+    <div id="statsContent">
+      <div class="empty-state">
+        <span class="emoji">📊</span>
+        لا توجد بيانات بعد.<br>أكمل تقييمك الأول لترى إحصائياتك هنا.
+      </div>
+    </div>
+
+    <div class="footer-note">البيانات محفوظة على متصفحك فقط، ولن يراها أحد سواك.</div>
+
+    <div class="danger-zone">
+      <button class="reset-btn" onclick="resetAllData()">إعادة ضبط كل البيانات من جديد</button>
+    </div>
+  </section>
+
+</div>
+
+<nav class="tabbar">
+  <button class="active" data-tab="home" onclick="goTo('home')">
+    <div class="dot"></div>الرئيسية
+  </button>
+  <button data-tab="assess" onclick="goTo('assess')">
+    <div class="dot"></div>تقييم اليوم
+  </button>
+  <button data-tab="stats" onclick="goTo('stats')">
+    <div class="dot"></div>الإحصائيات
+  </button>
+</nav>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="score" id="resultScore">0</div>
+    <div class="score-lbl">نقطة من أصل 55 اليوم</div>
+    <div class="verdict" id="resultVerdict"></div>
+    <button class="close-btn" onclick="closeResult()">تم</button>
+  </div>
+</div>
+
+<script>
+/* ============ constants ============ */
+const DAILY_GOAL = 30;
+const DAILY_MAX = 55;
+const TOTAL_DAYS = 90;
+const WEEK_GOAL = 210;
+const MONTH_GOAL = 900;
+const TOTAL_GOAL = 2700;
+const RATIO_MID = 150/210; // 0.714...
+
+const Q_POINTS = {
+  1:{yes:10, no:-5},
+  2:{no:10, yes:-5},
+  3:{yes:15, no:-10},
+  4:{yes:10, no:0},
+  5:{yes:10, no:-5}
+};
+
+let state = { startDate:null, entries:{} };
+let currentAnswers = {};
+let currentTraps = {1:false,2:false,3:false,4:false};
+let currentNotes = '';
+
+/* ============ date helpers ============ */
+function todayStr(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function diffDays(a,b){
+  const da = new Date(a+'T00:00:00');
+  const db = new Date(b+'T00:00:00');
+  return Math.round((db-da)/86400000);
+}
+function dayNumberFor(dateStr){
+  if(!state.startDate) return 1;
+  const n = diffDays(state.startDate, dateStr) + 1;
+  return Math.min(Math.max(n,1), TOTAL_DAYS);
+}
+function weekDayLabel(dateStr){
+  const days = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  return days[new Date(dateStr+'T00:00:00').getDay()];
+}
+
+/* ============ storage ============ */
+async function loadState(){
+  try{
+    const res = await window.storage.get('tracker_state', false);
+    if(res && res.value){
+      state = JSON.parse(res.value);
+    }
+  }catch(e){
+    state = { startDate:null, entries:{} };
+  }
+  if(!state.startDate){
+    state.startDate = todayStr();
+    await persistState();
+  }
+}
+async function persistState(){
+  try{
+    await window.storage.set('tracker_state', JSON.stringify(state), false);
+  }catch(e){
+    console.error('storage save failed', e);
+  }
+}
+
+/* ============ navigation ============ */
+function goTo(tab){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  document.querySelector(`nav.tabbar button[data-tab="${tab}"]`).classList.add('active');
+  if(tab==='assess') renderAssessView();
+  if(tab==='stats') renderStats();
+  if(tab==='home') renderHome();
+  window.scrollTo(0,0);
+}
+
+/* ============ assessment interactions ============ */
+function answerQ(qnum, val, btn){
+  currentAnswers[qnum] = val;
+  const card = btn.closest('.qcard');
+  card.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  updateSaveState();
+}
+function toggleTrap(n){
+  currentTraps[n] = !currentTraps[n];
+  const el = document.getElementById('trap'+n);
+  el.classList.toggle('on', currentTraps[n]);
+}
+function updateSaveState(){
+  const answered = Object.keys(currentAnswers).length === 5;
+  document.getElementById('saveBtn').disabled = !answered;
+}
+function computeScore(answers, traps){
+  let score = 0;
+  for(let q=1;q<=5;q++){
+    const a = answers[q];
+    score += Q_POINTS[q][a] ?? 0;
+  }
+  const trapsHit = Object.values(traps).filter(Boolean).length;
+  score -= trapsHit*5;
+  return score;
+}
+
+function renderAssessView(){
+  const today = todayStr();
+  const existing = state.entries[today];
+  document.getElementById('assessDateLbl').textContent =
+    `يوم ${dayNumberFor(today)} من ${TOTAL_DAYS} — ${weekDayLabel(today)}`;
+
+  // reset UI
+  currentAnswers = {};
+  currentTraps = {1:false,2:false,3:false,4:false};
+  currentNotes = '';
+  document.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.switch').forEach(s=>s.classList.remove('on'));
+  document.getElementById('notesInput').value = '';
+
+  if(existing){
+    currentAnswers = {...existing.answers};
+    currentTraps = {1:false,2:false,3:false,4:false, ...existing.traps};
+    currentNotes = existing.notes || '';
+    for(const q in currentAnswers){
+      const val = currentAnswers[q];
+      const card = document.querySelector(`.qcard[data-q="${q}"]`);
+      const btn = card.querySelector(`.yn-btn.${val}`);
+      if(btn) btn.classList.add('sel');
+    }
+    for(const n in currentTraps){
+      if(currentTraps[n]) document.getElementById('trap'+n).classList.add('on');
+    }
+    document.getElementById('notesInput').value = currentNotes;
+  }
+  updateSaveState();
+}
+
+async function saveToday(){
+  const today = todayStr();
+  const dayNumber = dayNumberFor(today);
+  const score = computeScore(currentAnswers, currentTraps);
+  state.entries[today] = {
+    dayNumber, date:today,
+    answers:{...currentAnswers},
+    traps:{...currentTraps},
+    notes: currentNotes || '',
+    score
+  };
+  await persistState();
+  showResult(score);
+}
+
+function showResult(score){
+  document.getElementById('resultScore').textContent = score;
+  const v = document.getElementById('resultVerdict');
+  v.className = 'verdict';
+  if(score >= DAILY_GOAL){
+    v.classList.add('status-good');
+    v.textContent = 'وصلت لهدفك اليومي ✓ استمر بنفس الالتزام';
+  } else if(score >= 15){
+    v.classList.add('status-mid');
+    v.textContent = 'قريب من الهدف ⚠️ حاول غداً بقوة أكبر';
+  } else {
+    v.classList.add('status-bad');
+    v.textContent = 'يوم ضعيف ❌ لا تستسلم، عدّل غداً';
+  }
+  document.getElementById('resultOverlay').classList.add('show');
+}
+function closeResult(){
+  document.getElementById('resultOverlay').classList.remove('show');
+  goTo('home');
+}
+
+/* ============ home ============ */
+function allEntries(){
+  return Object.values(state.entries).sort((a,b)=> a.dayNumber - b.dayNumber);
+}
+function totalPoints(){
+  return allEntries().reduce((s,e)=> s + e.score, 0);
+}
+function renderHome(){
+  const today = todayStr();
+  const dayNumber = dayNumberFor(today);
+  const entries = allEntries();
+  const total = totalPoints();
+
+  document.getElementById('homeDayNum').innerHTML = `${dayNumber} <span>/ ${TOTAL_DAYS}</span>`;
+  document.getElementById('topStreak').textContent = entries.length ? `${entries.length} يوم مُقيَّم` : '';
+
+  const doneToday = !!state.entries[today];
+  document.getElementById('homeDaySub').textContent = doneToday
+    ? 'تم تقييم اليوم — عد غداً'
+    : 'لم تُقيّم اليوم بعد';
+
+  const pct = Math.min((total/TOTAL_GOAL)*100, 100);
+  document.getElementById('homeProgressFill').style.width = pct+'%';
+  document.getElementById('homeProgressLbl').textContent = `${total} / ${TOTAL_GOAL} نقطة`;
+
+  document.getElementById('homeTotalPts').textContent = total;
+  const avg = entries.length ? Math.round(total/entries.length) : 0;
+  document.getElementById('homeAvgPts').textContent = avg;
+
+  const cta = document.getElementById('homeCta');
+  if(doneToday){
+    cta.textContent = 'مراجعة تقييم اليوم';
+  } else {
+    cta.textContent = 'تقييم اليوم';
+  }
+
+  const banner = document.getElementById('homeStatusBanner');
+  banner.className = 'status-banner';
+  if(entries.length===0){
+    banner.classList.add('status-mid');
+    banner.textContent = 'ابدأ تقييمك الأول اليوم';
+  } else {
+    const expected = dayNumber*30;
+    const s = statusTag(total, expected);
+    banner.classList.add(s.cls);
+    banner.textContent = s.label;
+  }
+}
+
+function statusTag(points, expected){
+  if(expected<=0) return {cls:'status-mid', tag:'tag-mid', label:'ابدأ تقييمك الأول اليوم'};
+  const ratio = points/expected;
+  if(ratio >= 1) return {cls:'status-good', tag:'tag-good', label:'أنت على المسار الصحيح ✓'};
+  if(ratio >= RATIO_MID) return {cls:'status-mid', tag:'tag-mid', label:'ركز أكثر ⚠️'};
+  return {cls:'status-bad', tag:'tag-bad', label:'في خطر ❌'};
+}
+
+/* ============ stats ============ */
+function renderStats(){
+  const entries = allEntries();
+  const container = document.getElementById('statsContent');
+  if(entries.length===0){
+    container.innerHTML = `<div class="empty-state"><span class="emoji">📊</span>لا توجد بيانات بعد.<br>أكمل تقييمك الأول لترى إحصائياتك هنا.</div>`;
+    return;
+  }
+
+  const today = todayStr();
+  const currentDay = dayNumberFor(today);
+  const weekNum = Math.ceil(currentDay/7);
+  const monthNum = Math.ceil(currentDay/30);
+  const weekStart = (weekNum-1)*7 + 1;
+  const weekEnd = weekNum*7;
+  const monthStart = (monthNum-1)*30 + 1;
+  const monthEnd = monthNum*30;
+
+  const weekPts = entries.filter(e=>e.dayNumber>=weekStart && e.dayNumber<=weekEnd)
+                          .reduce((s,e)=>s+e.score,0);
+  const monthPts = entries.filter(e=>e.dayNumber>=monthStart && e.dayNumber<=monthEnd)
+                           .reduce((s,e)=>s+e.score,0);
+  const total = totalPoints();
+
+  const elapsedInWeek = Math.min(currentDay, weekEnd) - weekStart + 1;
+  const elapsedInMonth = Math.min(currentDay, monthEnd) - monthStart + 1;
+
+  const weekStatus = statusTag(weekPts, elapsedInWeek*30);
+  const monthStatus = statusTag(monthPts, elapsedInMonth*30);
+  const totalStatus = statusTag(total, currentDay*30);
+
+  let html = `
+    <div class="period-grid">
+      <div class="period-card">
+        <div class="p-lbl">هذا الأسبوع</div>
+        <div class="p-num">${weekPts}</div>
+        <div class="p-goal">من ${WEEK_GOAL}</div>
+        <div class="p-tag ${weekStatus.tag}">${weekStatus.label.replace(' ⚠️','').replace(' ✓','').replace(' ❌','')}</div>
+      </div>
+      <div class="period-card">
+        <div class="p-lbl">هذا الشهر</div>
+        <div class="p-num">${monthPts}</div>
+        <div class="p-goal">من ${MONTH_GOAL}</div>
+        <div class="p-tag ${monthStatus.tag}">${monthStatus.label.replace(' ⚠️','').replace(' ✓','').replace(' ❌','')}</div>
+      </div>
+      <div class="period-card">
+        <div class="p-lbl">الإجمالي</div>
+        <div class="p-num">${total}</div>
+        <div class="p-goal">من ${TOTAL_GOAL}</div>
+        <div class="p-tag ${totalStatus.tag}">${totalStatus.label.replace(' ⚠️','').replace(' ✓','').replace(' ❌','')}</div>
+      </div>
+    </div>
+
+    <div class="status-banner ${totalStatus.cls}" style="margin-bottom:20px;">${totalStatus.label}</div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">آخر 14 يوم</div>
+      <div class="chart-bars" id="chartBars"></div>
+    </div>
+  `;
+  container.innerHTML = html;
+
+  // build bar chart for last 14 calendar days (by dayNumber), fill gaps as empty
+  const barsEl = document.getElementById('chartBars');
+  const startDay = Math.max(1, currentDay-13);
+  const byDayNumber = {};
+  entries.forEach(e=> byDayNumber[e.dayNumber] = e);
+
+  for(let d=startDay; d<=currentDay; d++){
+    const e = byDayNumber[d];
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    if(e){
+      const h = Math.max((e.score/DAILY_MAX)*100, 3);
+      const color = e.score>=DAILY_GOAL ? 'var(--green)' : (e.score>=15 ? 'var(--yellow)' : 'var(--red)');
+      col.innerHTML = `<div class="bar" style="height:${h}%;background:${color};"></div><div class="bar-day">${d}</div>`;
+    } else {
+      col.innerHTML = `<div class="bar bar-empty" style="height:4%;"></div><div class="bar-day">${d}</div>`;
+    }
+    barsEl.appendChild(col);
+  }
+}
+
+/* ============ reset ============ */
+async function resetAllData(){
+  const sure = confirm('هل أنت متأكد من إعادة ضبط كل البيانات؟ هيتم حذف كل تقدمك ولا يمكن التراجع عن ده.');
+  if(!sure) return;
+  state = { startDate: todayStr(), entries:{} };
+  await persistState();
+  currentAnswers = {};
+  currentTraps = {1:false,2:false,3:false,4:false};
+  currentNotes = '';
+  goTo('home');
+}
+
+/* ============ init ============ */
+(async function init(){
+  await loadState();
+  renderHome();
+})();
+</script>
+</body>
+</html>
